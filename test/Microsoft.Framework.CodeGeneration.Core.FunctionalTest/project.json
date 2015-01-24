@@ -1,15 +1,15 @@
 {
     "dependencies": {
-        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-*",
-        "Microsoft.Framework.DependencyInjection": "1.0.0-*",
-        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
+        "Microsoft.Framework.Runtime.Interfaces": "1.0.0-beta2",
+        "Microsoft.Framework.DependencyInjection": "1.0.0-beta2",
+        "Microsoft.Framework.CodeGeneration.Core": "1.0.0-beta2",
         "ModelTypesLocatorTestWebApp": "1.0.0",
         "Moq": "4.2.1312.1622",
-        "Xunit.KRunner": "1.0.0-*"
+        "xunit.runner.kre": "1.0.0-*"
     },
 
     "commands": {
-        "test": "Xunit.KRunner"
+        "test": "xunit.runner.kre"
     },
 
     "frameworks" : {
@@ -19,7 +19,7 @@
         },
         "aspnetcore50" : { 
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-*"
+                "System.Runtime": "4.0.20-beta-22416"
             }
         }
     }

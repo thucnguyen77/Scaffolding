@@ -4,6 +4,7 @@
         "Microsoft.Framework.DependencyInjection": "1.0.0-*",
         "Microsoft.Framework.CodeGeneration.Core": "1.0.0-*",
         "ModelTypesLocatorTestWebApp": "1.0.0",
+        "Microsoft.Framework.CodeGeneration.FunctionalTest.Shared": { "version": "1.0.0-*", "type": "build" },
         "xunit.runner.aspnet": "2.0.0-aspnet-*"
     },
 

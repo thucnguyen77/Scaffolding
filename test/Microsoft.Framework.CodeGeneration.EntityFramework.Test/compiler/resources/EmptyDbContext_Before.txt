@@ -1,0 +1,6 @@
+﻿namespace ContextNamespace
+{
+	public class MyContext : DbContext
+	{
+	}
+}

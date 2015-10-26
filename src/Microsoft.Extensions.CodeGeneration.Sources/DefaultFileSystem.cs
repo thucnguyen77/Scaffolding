@@ -11,6 +11,12 @@ namespace Microsoft.Extensions.CodeGeneration
 {
     internal class DefaultFileSystem : IFileSystem
     {
+        public static DefaultFileSystem Instance = new DefaultFileSystem();
+
+        private DefaultFileSystem()
+        {
+        }
+
         public async Task AddFileAsync(string outputPath, Stream sourceStream)
         {
             using (var writeStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))

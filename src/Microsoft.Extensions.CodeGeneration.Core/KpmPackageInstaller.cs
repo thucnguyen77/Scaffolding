@@ -22,7 +22,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public PackageInstaller(
             [NotNull]ILogger logger,
             [NotNull]IApplicationEnvironment environment)
-            : this(logger, environment, new DefaultFileSystem())
+            : this(logger, environment, DefaultFileSystem.Instance)
         {
         }
 

@@ -13,7 +13,7 @@ namespace Microsoft.Extensions.CodeGeneration
         private readonly IFileSystem _fileSystem;
 
         public FilesLocator()
-            : this(new DefaultFileSystem())
+            : this(DefaultFileSystem.Instance)
         {
         }
 

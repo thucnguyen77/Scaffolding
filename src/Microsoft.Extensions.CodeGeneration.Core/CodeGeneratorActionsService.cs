@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.CodeGeneration
         public CodeGeneratorActionsService(
             ITemplating templatingService,
             IFilesLocator filesLocator)
-            :this(templatingService, filesLocator, new DefaultFileSystem())
+            :this(templatingService, filesLocator, DefaultFileSystem.Instance)
         {
         }
 

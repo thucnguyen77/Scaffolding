@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Entity;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Data.Entity;
 using Microsoft.Extensions.DependencyInjection;
 using ContextNamespace;
 namespace WebAppNamespace
@@ -10,7 +11,8 @@ namespace WebAppNamespace
             servicesVar.AddEntityFramework()
                 .AddSqlServer()
                 .AddDbContext<MyContext>(options =>
-                    options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=MyContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true"));
+                    options.UseSqlServer(ConfigurationProp["Data:MyContext:ConnectionString"]));
         }
+        public IConfigurationRoot ConfigurationProp { get; set; }
     }
 }

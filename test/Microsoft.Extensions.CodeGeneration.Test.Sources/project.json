@@ -1,0 +1,10 @@
+{
+  "shared": "*.cs",
+  "dependencies": {
+    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
+    "Moq": "4.2.1312.1622"
+  },
+  "frameworks": {
+    "dnx451": { }
+  }
+}

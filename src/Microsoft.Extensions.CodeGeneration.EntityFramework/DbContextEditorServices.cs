@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
@@ -23,17 +24,29 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private readonly ILibraryManager _libraryManager;
         private readonly ITemplating _templatingService;
         private readonly IFilesLocator _filesLocator;
+        private readonly IFileSystem _fileSystem;
 
         public DbContextEditorServices(
             ILibraryManager libraryManager,
             IApplicationEnvironment environment,
             IFilesLocator filesLocator,
             ITemplating templatingService)
+            : this (libraryManager, environment, filesLocator, templatingService, DefaultFileSystem.Instance)
+        {
+        }
+
+        internal DbContextEditorServices(
+            ILibraryManager libraryManager,
+            IApplicationEnvironment environment,
+            IFilesLocator filesLocator,
+            ITemplating templatingService,
+            IFileSystem fileSystem)
         {
             _libraryManager = libraryManager;
             _environment = environment;
             _filesLocator = filesLocator;
             _templatingService = templatingService;
+            _fileSystem = fileSystem;
         }
 
         public async Task<SyntaxTree> AddNewContext([NotNull]NewDbContextTemplateModel dbContextTemplateModel)
@@ -123,20 +136,23 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                     .FirstOrDefault(n => n is MethodDeclarationSyntax
                         && ((MethodDeclarationSyntax)n).Identifier.ToString() == "ConfigureServices") as MethodDeclarationSyntax;
 
-                if (configServicesMethod != null)
+                var configRootProperty = TryGetIConfigurationRootProperty(startUp.TypeSymbol);
+
+                if (configServicesMethod != null && configRootProperty != null)
                 {
                     var servicesParam = configServicesMethod.ParameterList.Parameters
                         .FirstOrDefault(p => p.Type.ToString() == "IServiceCollection") as ParameterSyntax;
 
                     if (servicesParam != null)
                     {
+                        AddConnectionString(dbContextTypeName, dataBaseName);
                         var statementLeadingTrivia = configServicesMethod.Body.OpenBraceToken.LeadingTrivia.ToString() + "    ";
 
                         string textToAddAtEnd =
                             statementLeadingTrivia + "{0}.AddEntityFramework()" + Environment.NewLine +
                             statementLeadingTrivia + "    .AddSqlServer()" + Environment.NewLine +
                             statementLeadingTrivia + "    .AddDbContext<{1}>(options =>" + Environment.NewLine +
-                            statementLeadingTrivia + "        options.UseSqlServer(@\"Server=(localdb)\\mssqllocaldb;Database={2};Trusted_Connection=True;MultipleActiveResultSets=true\"));" + Environment.NewLine;
+                            statementLeadingTrivia + "        options.UseSqlServer({2}[\"Data:{1}:ConnectionString\"]));" + Environment.NewLine;
 
                         if (configServicesMethod.Body.Statements.Any())
                         {
@@ -146,7 +162,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
                         var expression = SyntaxFactory.ParseStatement(String.Format(textToAddAtEnd,
                             servicesParam.Identifier,
                             dbContextTypeName,
-                            dataBaseName));
+                            configRootProperty.Name));
 
                         MethodDeclarationSyntax newConfigServicesMethod = configServicesMethod.AddBodyStatements(expression);
 
@@ -172,6 +188,76 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             {
                 Edited = false
             };
+        }
+
+        private IPropertySymbol TryGetIConfigurationRootProperty(ITypeSymbol startup)
+        {
+            var propertySymbols = startup.GetMembers()
+                .Select(m => m as IPropertySymbol)
+                .Where(s => s != null);
+
+            foreach (var pSymbol in propertySymbols)
+            {
+                var namedType = pSymbol.Type as INamedTypeSymbol; //When can this go wrong?
+                if (namedType != null &&
+                    namedType.ContainingAssembly.Name == "Microsoft.Extensions.Configuration.Abstractions" &&
+                    namedType.ContainingNamespace.ToDisplayString() == "Microsoft.Extensions.Configuration" &&
+                    namedType.Name == "IConfigurationRoot") // What happens if the type is referenced in full in code??
+                {
+                    return pSymbol;
+                }
+            }
+
+            return null;
+        }
+
+        // Internal for unit tests.
+        internal void AddConnectionString(string connectionStringName, string dataBaseName)
+        {
+            var appSettingsFile = Path.Combine(_environment.ApplicationBasePath, "appsettings.json");
+            JObject content;
+            bool writeContent = false;
+
+            if (!_fileSystem.FileExists(appSettingsFile))
+            {
+                content = new JObject();
+                writeContent = true;
+            }
+            else
+            {
+                content = JObject.Parse(_fileSystem.ReadAllText(appSettingsFile));
+            }
+
+            string dataNodeName = "Data";
+            string connectionStringNodeName = "ConnectionString";
+
+            if (content[dataNodeName] == null)
+            {
+                writeContent = true;
+                content[dataNodeName] = new JObject();
+            }
+
+            if (content[dataNodeName][connectionStringName] == null)
+            {
+                writeContent = true;
+                content[dataNodeName][connectionStringName] = new JObject();
+            }
+
+            if (content[dataNodeName][connectionStringName][connectionStringNodeName] == null)
+            {
+                writeContent = true;
+                content[dataNodeName][connectionStringName][connectionStringNodeName] =
+                    String.Format("Server=(localdb)\\mssqllocaldb;Database={0};Trusted_Connection=True;MultipleActiveResultSets=true",
+                        dataBaseName);
+            }
+            
+            // Json.Net loses comments so the above code if requires any changes loses
+            // comments in the file. The writeContent bool is for saving
+            // a specific case without losing comments - when no changes are needed.
+            if (writeContent)
+            {
+                _fileSystem.WriteAllText(appSettingsFile, content.ToString());
+            }
         }
 
         private bool IsModelPropertyExists(ITypeSymbol dbContext, string modelTypeFullName)

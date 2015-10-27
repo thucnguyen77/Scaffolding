@@ -1,9 +1,13 @@
 {
-    "dependencies": {
-        "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
-        "Moq": "4.2.1312.1622",
-        "xunit.runner.aspnet": "2.0.0-aspnet-*"
+  "dependencies": {
+    "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.Extensions.CodeGeneration.Test.Sources": {
+      "version": "1.0.0-*",
+      "type": "build"
     },
+    "Moq": "4.2.1312.1622",
+    "xunit.runner.aspnet": "2.0.0-aspnet-*"
+  },
     "commands": {
         "test": "xunit.runner.aspnet"
     },

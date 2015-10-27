@@ -6,6 +6,9 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.CodeGeneration.Test.Sources;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
 {
@@ -27,11 +30,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
 
             var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { contextTree, modelTree }, new[] { efReference });
 
-            DbContextEditorServices testObj = new DbContextEditorServices(
-                new Mock<ILibraryManager>().Object,
-                new Mock<IApplicationEnvironment>().Object,
-                new Mock<IFilesLocator>().Object,
-                new Mock<ITemplating>().Object);
+            DbContextEditorServices testObj = GetTestObject();
 
             var types = RoslynUtilities.GetDirectTypesInCompilation(compilation);
             var modelType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "MyModel").First());
@@ -57,14 +56,11 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             var startupTree = CSharpSyntaxTree.ParseText(beforeStartupText);
             var contextTree = CSharpSyntaxTree.ParseText(dbContextText);
             var efReference = MetadataReference.CreateFromFile(typeof(DbContext).Assembly.Location);
+            var configReference = MetadataReference.CreateFromFile(typeof(IConfigurationRoot).Assembly.Location);
 
-            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference });
+            var compilation = CSharpCompilation.Create("DoesNotMatter", new[] { startupTree, contextTree }, new[] { efReference, configReference });
 
-            DbContextEditorServices testObj = new DbContextEditorServices(
-                new Mock<ILibraryManager>().Object,
-                new Mock<IApplicationEnvironment>().Object,
-                new Mock<IFilesLocator>().Object,
-                new Mock<ITemplating>().Object);
+            DbContextEditorServices testObj = GetTestObject();
 
             var types = RoslynUtilities.GetDirectTypesInCompilation(compilation);
             var startupType = ModelType.FromITypeSymbol(types.Where(ts => ts.Name == "Startup").First());
@@ -75,5 +71,69 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework.Test
             Assert.True(result.Edited);
             Assert.Equal(afterStartupText, result.NewTree.GetText().ToString());
         }
+
+        [Fact]
+        public void AddConnectionString_Creates_App_Settings_File()
+        {
+            //Arrange
+            var fs = new MockFileSystem();
+            var testObj = GetTestObject(fs);
+
+            //Act
+            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid");
+
+            //Assert
+            string expected = "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\"\r\n    }\r\n  }\r\n}";
+            var appSettingsPath = Path.Combine(AppBase, "appsettings.json"); 
+            fs.FileExists(appSettingsPath);
+            Assert.Equal(expected, fs.ReadAllText(appSettingsPath));
+        }
+
+        [Theory]
+        // Empty invalid json file - should this be supported?
+        //[InlineData("",
+        //    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"@\\\"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\\\"\"\r\n    }\r\n  }\r\n}")]
+        // Empty file with valid json token
+        [InlineData("{}",
+                    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\"\r\n    }\r\n  }\r\n}")]
+        // File with no node for connection name
+        [InlineData("{\r\n  \"Data\": {\r\n  }\r\n}",
+                    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\"\r\n    }\r\n  }\r\n}")]
+        // File with node for connection name but no ConnectionString property
+        [InlineData("{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n    }\r\n}\r\n}",
+                    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"Server=(localdb)\\\\mssqllocaldb;Database=MyDbContext-NewGuid;Trusted_Connection=True;MultipleActiveResultSets=true\"\r\n    }\r\n  }\r\n}")]
+        // File with node for connection name and also existing ConnectionString property
+        // modification should be skipped in this case
+        [InlineData("{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"SomeExistingValue\"\r\n    }\r\n}\r\n}",
+                    "{\r\n  \"Data\": {\r\n    \"MyDbContext\": {\r\n      \"ConnectionString\": \"SomeExistingValue\"\r\n    }\r\n}\r\n}")]
+        public void AddConnectionString_Modifies_App_Settings_File_As_Required(string previousContent, string newContent)
+        {
+            //Arrange
+            var fs = new MockFileSystem();
+            var appSettingsPath = Path.Combine(AppBase, "appsettings.json");
+            fs.WriteAllText(appSettingsPath, previousContent);
+            var testObj = GetTestObject(fs);
+
+            //Act
+            testObj.AddConnectionString("MyDbContext", "MyDbContext-NewGuid");
+
+            //Assert
+            Assert.Equal(newContent, fs.ReadAllText(appSettingsPath));
+        }
+
+        private DbContextEditorServices GetTestObject(MockFileSystem fs = null)
+        {
+            var app = new Mock<IApplicationEnvironment>();
+            app.Setup(a => a.ApplicationBasePath).Returns(AppBase);
+
+            return new DbContextEditorServices(
+                new Mock<ILibraryManager>().Object,
+                app.Object,
+                new Mock<IFilesLocator>().Object,
+                new Mock<ITemplating>().Object,
+                fs != null ? fs : new MockFileSystem());
+        }
+
+        private static readonly string AppBase = "AppBase";
     }
 }

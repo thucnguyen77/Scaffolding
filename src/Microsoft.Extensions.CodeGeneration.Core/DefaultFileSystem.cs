@@ -9,7 +9,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
-    internal class DefaultFileSystem : IFileSystem
+    /// <summary>
+    /// Default implementation of <see cref="IFileSystem"/>
+    /// using the real file sytem.
+    /// </summary>
+    public class DefaultFileSystem : IFileSystem
     {
         public static DefaultFileSystem Instance = new DefaultFileSystem();
 

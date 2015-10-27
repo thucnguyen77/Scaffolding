@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Extensions.CodeGeneration.Core.Test
+namespace Microsoft.Extensions.CodeGeneration.Test.Sources
 {
     /// <summary>
     /// A useful helper moq for IFileSystem.
@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.CodeGeneration.Core.Test
     /// Maintaining the integrity of file system is the responsibility of caller.
     /// (Like creating files and folders in a proper way)
     /// </summary>
-    public class MockFileSystem : IFileSystem
+    internal class MockFileSystem : IFileSystem
     {
         Dictionary<string, string> _files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         HashSet<string> _folders = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

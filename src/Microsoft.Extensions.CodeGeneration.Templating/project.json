@@ -9,19 +9,10 @@
       "version": "1.0.0-*",
       "type": "build"
     },
-    "Microsoft.AspNet.Razor": "4.0.0-*",
-    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*"
+    "Microsoft.AspNet.Razor": "4.0.0-*"
   },
 
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Runtime": "",
-        "System.IO": "",
-        "System.Text.Encoding": "",
-        "System.Threading.Tasks": ""
-      }
-    },
     "dnxcore50": {
       "dependencies": {
         "System.IO": "4.0.11-*",

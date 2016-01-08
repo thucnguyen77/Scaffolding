@@ -5,9 +5,8 @@ using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
-using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -91,13 +90,13 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
 
-            serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
-            serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
-            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);
-            serviceProvider.Add(typeof(IAssemblyLoaderContainer), PlatformServices.Default.AssemblyLoaderContainer);
-            serviceProvider.Add(typeof(ILibraryManager), PlatformServices.Default.LibraryManager);
-            serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
-            serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
+            //serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
+            //serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
+            //serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);
+            //serviceProvider.Add(typeof(IAssemblyLoaderContainer), PlatformServices.Default.AssemblyLoaderContainer);
+            //serviceProvider.Add(typeof(ILibraryManager), PlatformServices.Default.LibraryManager);
+            //serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
+            //serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
 
             //Ordering of services is important here
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());

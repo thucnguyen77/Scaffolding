@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Dnx.Compilation.CSharp;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -37,12 +35,10 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(environment));
             }
 
-            var export = libraryExporter.GetExport(environment.ApplicationName);
-
-            var project = export.MetadataReferences
-                .OfType<IMetadataProjectReference>()
-                .OfType<IRoslynMetadataReference>()
-                .Select(reference => reference.MetadataReference as CompilationReference)
+            var project = libraryExporter.GetExport(environment.ApplicationName).GetMetadataReferences()
+                //.OfType<IMetadataProjectReference>()
+                //.OfType<IRoslynMetadataReference>()
+                .Select(reference => reference as CompilationReference)
                 .FirstOrDefault();
 
             Debug.Assert(project != null);
@@ -63,12 +59,12 @@ namespace Microsoft.Extensions.CodeGeneration
                 throw new ArgumentNullException(nameof(environment));
             }
 
-            var export = libraryExporter.GetAllExports(environment.ApplicationName);
+            var export = libraryExporter.GetExport(environment.ApplicationName);
 
-            return export.MetadataReferences
-                .OfType<IMetadataProjectReference>()
-                .OfType<IRoslynMetadataReference>()
-                .Select(reference => reference.MetadataReference as CompilationReference)
+            return export.GetMetadataReferences()
+                //.OfType<IMetadataProjectReference>()
+                //.OfType<IRoslynMetadataReference>()
+                .Select(reference => reference as CompilationReference)
                 .Where(compilation => !_frameworkProjectNames.Contains(compilation.Compilation.AssemblyName));
         }
     }

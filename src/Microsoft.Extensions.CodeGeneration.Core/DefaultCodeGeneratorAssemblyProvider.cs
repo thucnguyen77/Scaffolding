@@ -5,7 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using Microsoft.DotNet.ProjectModel;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -37,13 +38,13 @@ namespace Microsoft.Extensions.CodeGeneration
                     .SelectMany(_libraryManager.GetReferencingLibraries)
                     .Distinct()
                     .Where(IsCandidateLibrary)
-                    .Select(lib => Assembly.Load(new AssemblyName(lib.Name)));
+                    .Select(lib => Assembly.Load(new AssemblyName(lib.Identity.Name)));
             }
         }
 
-        private bool IsCandidateLibrary(Library library)
+        private bool IsCandidateLibrary(LibraryDescription library)
         {
-            return !_codeGenerationFrameworkAssemblies.Contains(library.Name);
+            return !_codeGenerationFrameworkAssemblies.Contains(library.Identity.Name);
         }
     }
 }

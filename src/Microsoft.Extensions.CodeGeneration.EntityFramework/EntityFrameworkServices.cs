@@ -14,8 +14,8 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private readonly IApplicationEnvironment _environment;
         private readonly ILibraryManager _libraryManager;
         private readonly ILibraryExporter _libraryExporter;
-        private readonly IAssemblyLoadContext _loader;
+        private readonly AssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
         private readonly IServiceProvider _serviceProvider;
@@ -38,7 +38,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             ILibraryManager libraryManager,
             ILibraryExporter libraryExporter,
             IApplicationEnvironment environment,
-            IAssemblyLoadContextAccessor loader,
+            //TODO: @prbhosal Fix this 
+            //IAssemblyLoadContextAccessor loader,
             IModelTypesLocator modelTypesLocator,
             IDbContextEditorServices dbContextEditorServices,
             IPackageInstaller packageInstaller,
@@ -59,11 +60,11 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             {
                 throw new ArgumentNullException(nameof(environment));
             }
-
-            if (loader == null)
-            {
-                throw new ArgumentNullException(nameof(loader));
-            }
+            //TODO: @prbhosal Fix this 
+            //if (loader == null)
+            //{
+            //    throw new ArgumentNullException(nameof(loader));
+            //}
 
             if (modelTypesLocator == null)
             {
@@ -93,7 +94,9 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
             _environment = environment;
-            _loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
+            //_loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
+            //TODO: @prbhosal Fix this 
+            _loader = null;
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
             _packageInstaller = packageInstaller;

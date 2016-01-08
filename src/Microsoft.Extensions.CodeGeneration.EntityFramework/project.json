@@ -16,14 +16,10 @@
   },
 
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Text.Encoding": "4.0.0.0"
-      }
-    },
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-*",
+        "System.Runtime.Loader": "4.0.0-*",
         "System.Text.Encoding": "4.0.11-*"
       }
     }

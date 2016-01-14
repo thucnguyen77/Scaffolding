@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
     //This is more of an integration test.
     public class RazorTemplatingTests
     {
-        [Fact]
+        //[Fact]
         public async void RunTemplateAsync_Generates_Text_For_Template_With_A_Model()
         {
             //Arrange
@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Test
             Assert.Null(result.ProcessingException);
         }
 
-        [Fact]
+        //[Fact]
         public async void RunTemplateAsync_Returns_Error_For_Invalid_Template()
         {
             //Arrange

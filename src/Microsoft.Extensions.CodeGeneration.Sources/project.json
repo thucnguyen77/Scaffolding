@@ -2,10 +2,16 @@
   "version": "1.0.0-*",
   "shared": "*.cs",
   "frameworks": {
-    "dnx451": { },
+    "dnx451": { 
+      "frameworkAssemblies": {
+        "System.Runtime": "",
+        "System.Threading.Tasks":"" 
+      }
+    },
     "dnxcore50": {
       "dependencies": {
-        "System.Runtime": "4.0.21-*"
+        "System.Runtime": "4.0.21-*",
+        "System.AppContext": "4.0.1-*"
       }
     }
   }

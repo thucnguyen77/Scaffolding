@@ -5,7 +5,6 @@
     "keyFile": "../../tools/Key.snk"
   },
   "dependencies": {
-    "Microsoft.Dnx.Compilation.CSharp.Abstractions": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -17,7 +16,6 @@
     "Newtonsoft.Json": "6.0.6"
   },
   "frameworks": {
-    "dnx451": { },
     "dnxcore50": {
       "dependencies": {
         "System.Console": "4.0.0-*",

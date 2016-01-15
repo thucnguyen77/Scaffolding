@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using Microsoft.DotNet.ProjectModel;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -33,17 +35,22 @@ namespace Microsoft.Extensions.CodeGeneration
         {
             get
             {
-                return _codeGenerationFrameworkAssemblies
+                //TODO @prbhosal This needs to look into the bin folder for the assemblies. 
+                var list = _codeGenerationFrameworkAssemblies
                     .SelectMany(_libraryManager.GetReferencingLibraries)
                     .Distinct()
-                    .Where(IsCandidateLibrary)
-                    .Select(lib => Assembly.Load(new AssemblyName(lib.Name)));
+                    .Where(IsCandidateLibrary);
+                foreach(var lib in list)
+                {
+                    Console.WriteLine(lib.Identity.Name + " " + lib.Path);
+                }
+                return list.Select(lib => Assembly.Load(new AssemblyName(lib.Identity.Name)));
             }
         }
 
-        private bool IsCandidateLibrary(Library library)
+        private bool IsCandidateLibrary(LibraryDescription library)
         {
-            return !_codeGenerationFrameworkAssemblies.Contains(library.Name);
+            return !_codeGenerationFrameworkAssemblies.Contains(library.Identity.Name) && ("Project" != library.Identity.Type.Value);
         }
     }
 }

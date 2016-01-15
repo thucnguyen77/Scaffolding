@@ -14,8 +14,8 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Data.Entity;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration.EntityFramework
 {
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
         private readonly IApplicationEnvironment _environment;
         private readonly ILibraryManager _libraryManager;
         private readonly ILibraryExporter _libraryExporter;
-        private readonly IAssemblyLoadContext _loader;
+        private readonly AssemblyLoadContext _loader;
         private readonly IModelTypesLocator _modelTypesLocator;
         private readonly IPackageInstaller _packageInstaller;
         private readonly IServiceProvider _serviceProvider;
@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             ILibraryManager libraryManager,
             ILibraryExporter libraryExporter,
             IApplicationEnvironment environment,
-            IAssemblyLoadContextAccessor loader,
+            AssemblyLoadContext loader,
             IModelTypesLocator modelTypesLocator,
             IDbContextEditorServices dbContextEditorServices,
             IPackageInstaller packageInstaller,
@@ -93,7 +93,8 @@ namespace Microsoft.Extensions.CodeGeneration.EntityFramework
             _libraryManager = libraryManager;
             _libraryExporter = libraryExporter;
             _environment = environment;
-            _loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
+            //_loader = loader.GetLoadContext(typeof(EntityFrameworkServices).GetTypeInfo().Assembly);
+            _loader = loader;
             _modelTypesLocator = modelTypesLocator;
             _dbContextEditorServices = dbContextEditorServices;
             _packageInstaller = packageInstaller;

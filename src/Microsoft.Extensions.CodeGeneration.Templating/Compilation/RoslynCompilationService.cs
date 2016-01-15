@@ -9,9 +9,9 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.Dnx.Compilation.CSharp;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 {
@@ -22,14 +22,16 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
         private readonly ILibraryExporter _libraryExporter;
         private readonly IApplicationEnvironment _environment;
-        private readonly IAssemblyLoadContext _loader;
+        private readonly AssemblyLoadContext _loader;
 
         public RoslynCompilationService(IApplicationEnvironment environment,
-                                        IAssemblyLoadContextAccessor accessor,
+                                        //IAssemblyLoadContextAccessor accessor,
                                         ILibraryExporter libraryExporter)
         {
             _environment = environment;
-            _loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
+            //_loader = accessor.GetLoadContext(typeof(RoslynCompilationService).GetTypeInfo().Assembly);
+            // TODO @prbhosal fix this
+            _loader = null;
             _libraryExporter = libraryExporter;
         }
 
@@ -77,13 +79,13 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
 
             foreach (var baseProject in baseProjects)
             {
-                var export = _libraryExporter.GetAllExports(baseProject);
+                var export = _libraryExporter.GetAllExports();
 
                 if (export != null)
                 {
-                    foreach (var metadataReference in export.MetadataReferences)
+                    foreach (var metadataReference in export.SelectMany(_=>_.GetMetadataReferences()))
                     {
-                        references.Add(ConvertMetadataReference(metadataReference));
+                        references.Add(metadataReference);
                     }
                 }
             }
@@ -91,42 +93,42 @@ namespace Microsoft.Extensions.CodeGeneration.Templating.Compilation
             return references;
         }
 
-        private MetadataReference ConvertMetadataReference(IMetadataReference metadataReference)
-        {
-            var roslynReference = metadataReference as IRoslynMetadataReference;
+        //private MetadataReference ConvertMetadataReference(IMetadataReference metadataReference)
+        //{
+        //    var roslynReference = metadataReference as IRoslynMetadataReference;
 
-            if (roslynReference != null)
-            {
-                return roslynReference.MetadataReference;
-            }
+        //    if (roslynReference != null)
+        //    {
+        //        return roslynReference.MetadataReference;
+        //    }
 
-            var embeddedReference = metadataReference as IMetadataEmbeddedReference;
+        //    var embeddedReference = metadataReference as IMetadataEmbeddedReference;
 
-            if (embeddedReference != null)
-            {
-                return MetadataReference.CreateFromImage(embeddedReference.Contents);
-            }
+        //    if (embeddedReference != null)
+        //    {
+        //        return MetadataReference.CreateFromImage(embeddedReference.Contents);
+        //    }
 
-            var fileMetadataReference = metadataReference as IMetadataFileReference;
+        //    var fileMetadataReference = metadataReference as IMetadataFileReference;
 
-            if (fileMetadataReference != null)
-            {
-                return CreateMetadataFileReference(fileMetadataReference.Path);
-            }
+        //    if (fileMetadataReference != null)
+        //    {
+        //        return CreateMetadataFileReference(fileMetadataReference.Path);
+        //    }
 
-            var projectReference = metadataReference as IMetadataProjectReference;
-            if (projectReference != null)
-            {
-                using (var ms = new MemoryStream())
-                {
-                    projectReference.EmitReferenceAssembly(ms);
+        //    var projectReference = metadataReference as IMetadataProjectReference;
+        //    if (projectReference != null)
+        //    {
+        //        using (var ms = new MemoryStream())
+        //        {
+        //            projectReference.EmitReferenceAssembly(ms);
 
-                    return MetadataReference.CreateFromImage(ms.ToArray());
-                }
-            }
+        //            return MetadataReference.CreateFromImage(ms.ToArray());
+        //        }
+        //    }
 
-            throw new NotSupportedException();
-        }
+        //    throw new NotSupportedException();
+        //}
 
         private MetadataReference CreateMetadataFileReference(string path)
         {

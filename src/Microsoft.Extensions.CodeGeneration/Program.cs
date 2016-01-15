@@ -5,9 +5,12 @@ using System.Reflection;
 using Microsoft.Extensions.CodeGeneration.EntityFramework;
 using Microsoft.Extensions.CodeGeneration.Templating;
 using Microsoft.Extensions.CodeGeneration.Templating.Compilation;
-using Microsoft.Extensions.CompilationAbstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.DotNet.ProjectModel;
+using System.Runtime.Loader;
+using System.IO;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -15,73 +18,88 @@ namespace Microsoft.Extensions.CodeGeneration
     {
         public static void Main(string[] args)
         {
-            var serviceProvider = new ServiceProvider();
-
-            AddCodeGenerationServices(serviceProvider);
-
-            var generatorsLocator = serviceProvider.GetRequiredService<ICodeGeneratorLocator>();
-            var logger = serviceProvider.GetRequiredService<ILogger>();
-
-            if (args == null || args.Length == 0 || IsHelpArgument(args[0]))
+            PrintCommandLine(args);
+            var app = new CommandLineApplication(false)
             {
-                ShowCodeGeneratorList(serviceProvider, generatorsLocator.CodeGenerators);
-                return;
+                Name = "Code Generation",
+                Description = "Code generation for Asp.net"
+            };
+            app.HelpOption("-h|--help");
+            var projectPath = app.Option("-p|--project", "Path to project.json", CommandOptionType.SingleValue);
+
+            
+
+            app.OnExecute(() =>
+            {
+                PrintCommandLine(projectPath, app.RemainingArguments);
+                var serviceProvider = new ServiceProvider();
+                var context = CreateProjectContext(projectPath.Value());
+                AddFrameworkServices(serviceProvider, context);
+                AddCodeGenerationServices(serviceProvider);
+                var codeGenCommand = new CodeGenCommand(serviceProvider);
+                codeGenCommand.Execute(app.RemainingArguments.ToArray());
+                return 1;
+            });
+
+            app.Execute(args);
+        }
+
+        private static void PrintCommandLine(CommandOption projectPath, List<string> remainingArguments)
+        {
+            Console.WriteLine("Command line After parsing :: ");
+            if(projectPath != null)
+            {
+                Console.WriteLine(string.Format("    Project path: {0}", projectPath.Value()));
             }
-
-            try
+            Console.WriteLine("    Remaining Args :: ");
+            if(remainingArguments != null)
             {
-                var codeGeneratorName = args[0];
-
-                logger.LogMessage("Finding the generator '" + codeGeneratorName + "'...");
-                var generatorDescriptor = generatorsLocator.GetCodeGenerator(codeGeneratorName);
-
-                var actionInvoker = new ActionInvoker(generatorDescriptor.CodeGeneratorAction);
-
-                logger.LogMessage("Running the generator '" + codeGeneratorName + "'...");
-                actionInvoker.Execute(args);
-            }
-            catch (Exception ex)
-            {
-                while (ex is TargetInvocationException)
+                foreach (var arg in remainingArguments)
                 {
-                    ex = ex.InnerException;
+                    Console.WriteLine("        "+arg);
                 }
-                logger.LogMessage(ex.Message, LogMessageLevel.Error);
             }
         }
 
-        private static void ShowCodeGeneratorList(IServiceProvider serviceProvider, IEnumerable<CodeGeneratorDescriptor> codeGenerators)
+        private static void AddFrameworkServices(ServiceProvider serviceProvider, ProjectContext context)
         {
-            var logger = serviceProvider.GetRequiredService<ILogger>();
+            serviceProvider.Add(typeof(IApplicationEnvironment),new ApplicationEnvironment());
+            //serviceProvider.Add(typeof(AssemblyLoadContext), context.CreateLoadContext());
+            serviceProvider.Add(typeof(ILibraryManager), new LibraryManager(context));
+            serviceProvider.Add(typeof(ILibraryExporter), new LibraryExporter(context));
+        }
 
-            if (codeGenerators.Any())
+        private static ProjectContext CreateProjectContext(string projectPath)
+        {
+            projectPath = projectPath ?? Directory.GetCurrentDirectory();
+
+            if (!projectPath.EndsWith(Project.FileName))
             {
-                logger.LogMessage("Usage:  dnx gen [code generator name]\n");
-                logger.LogMessage("Code Generators:");
+                projectPath = Path.Combine(projectPath, Project.FileName);
+            }
 
-                foreach (var generator in codeGenerators)
+            if (!File.Exists(projectPath))
+            {
+                throw new InvalidOperationException($"{projectPath} does not exist.");
+            }
+
+            return ProjectContext.CreateContextForEachFramework(projectPath).FirstOrDefault();
+        }
+
+        private static void PrintCommandLine(string []args)
+        {
+            Console.WriteLine("Raw command line ::");
+            if(args != null)
+            {
+                foreach(string arg in args)
                 {
-                    logger.LogMessage(generator.Name);
+                    Console.WriteLine("    "+arg);
                 }
-
-                logger.LogMessage("\nTry dnx gen [code generator name] -? for help about specific code generator.");
             }
             else
             {
-                logger.LogMessage("There are no code generators installed to run.");
+                Console.WriteLine("No arguments!!! >-<");
             }
-        }
-
-        private static bool IsHelpArgument(string argument)
-        {
-            if (argument == null)
-            {
-                throw new ArgumentNullException(nameof(argument));
-            }
-
-            return string.Equals("-h", argument, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("-?", argument, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals("--help", argument, StringComparison.OrdinalIgnoreCase);
         }
 
         private static void AddCodeGenerationServices(ServiceProvider serviceProvider)
@@ -90,14 +108,6 @@ namespace Microsoft.Extensions.CodeGeneration
             {
                 throw new ArgumentNullException(nameof(serviceProvider));
             }
-
-            serviceProvider.Add(typeof(IApplicationEnvironment), PlatformServices.Default.Application);
-            serviceProvider.Add(typeof(IRuntimeEnvironment), PlatformServices.Default.Runtime);
-            serviceProvider.Add(typeof(IAssemblyLoadContextAccessor), PlatformServices.Default.AssemblyLoadContextAccessor);
-            serviceProvider.Add(typeof(IAssemblyLoaderContainer), PlatformServices.Default.AssemblyLoaderContainer);
-            serviceProvider.Add(typeof(ILibraryManager), PlatformServices.Default.LibraryManager);
-            serviceProvider.Add(typeof(ILibraryExporter), CompilationServices.Default.LibraryExporter);
-            serviceProvider.Add(typeof(ICompilerOptionsProvider), CompilationServices.Default.CompilerOptionsProvider);
 
             //Ordering of services is important here
             serviceProvider.Add(typeof(ILogger), new ConsoleLogger());
@@ -113,8 +123,8 @@ namespace Microsoft.Extensions.CodeGeneration
 
             serviceProvider.AddServiceWithDependencies<IModelTypesLocator, ModelTypesLocator>();
             serviceProvider.AddServiceWithDependencies<ICodeGeneratorActionsService, CodeGeneratorActionsService>();
-            serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
-            serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
+            //serviceProvider.AddServiceWithDependencies<IDbContextEditorServices, DbContextEditorServices>();
+            //serviceProvider.AddServiceWithDependencies<IEntityFrameworkService, EntityFrameworkServices>();
         }
     }
 }

@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
@@ -63,7 +63,7 @@ namespace Microsoft.Extensions.CodeGeneration
             return libraryExporter
                 .GetProjectsInApp(environment)
                 .Select(comp => libraryManager.GetLibrary(comp.Compilation.AssemblyName))
-                .Select(lib => LoadAssembly(lib.Name));
+                .Select(lib => LoadAssembly(lib.Identity.Name));
         }
 
         private static Assembly LoadAssembly(string name)

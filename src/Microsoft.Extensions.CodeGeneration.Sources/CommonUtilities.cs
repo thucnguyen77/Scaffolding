@@ -6,16 +6,18 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
-using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
+using System.Runtime.Loader;
 
 namespace Microsoft.Extensions.CodeGeneration
 {
     internal static class CommonUtilities
     {
         public static CompilationResult GetAssemblyFromCompilation(
-            IAssemblyLoadContext loader,
+            AssemblyLoadContext loader,
             CodeAnalysis.Compilation compilation)
         {
+            var assemblyName = Path.GetRandomFileName() + ".dll";
             EmitResult result;
             using (var ms = new MemoryStream())
             {
@@ -43,14 +45,32 @@ namespace Microsoft.Extensions.CodeGeneration
                     ms.Seek(0, SeekOrigin.Begin);
 
                     Assembly assembly;
+                    //TODO: @prbhosal Fix this 
+                    using (var writer = new BinaryWriter(File.Open(assemblyName, FileMode.CreateNew)))
+                    {
+                        int length = 4096;
+                        int read = 0;
+                        do
+                        {
+                            byte[] buff = new byte[length];
+                            read = ms.Read(buff, 0, length);
+                            if (read > 0)
+                            {
+                                writer.Write(buff);
+                            }
+                        } while (read > 0);
+                    }
+
                     if (PlatformHelper.IsMono)
                     {
-                        assembly = loader.LoadStream(ms, assemblySymbols: null);
+                        assembly = loader.LoadFromAssemblyName(new AssemblyName(assemblyName));
+                        //assembly = loader.LoadStream(ms, assemblySymbols: null);
                     }
                     else
                     {
+                        assembly = loader.LoadFromAssemblyName(new AssemblyName(assemblyName));
                         pdb.Seek(0, SeekOrigin.Begin);
-                        assembly = loader.LoadStream(ms, pdb);
+                        //assembly = loader.LoadStream(ms, pdb);
                     }
 
                     return CompilationResult.FromAssembly(assembly);

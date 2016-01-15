@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.CompilationAbstractions;
-using Microsoft.Extensions.PlatformAbstractions;
+
+using Microsoft.Extensions.CodeGeneration.Sources.DotNet;
 
 namespace Microsoft.Extensions.CodeGeneration
 {

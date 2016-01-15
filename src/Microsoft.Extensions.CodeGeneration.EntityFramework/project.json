@@ -12,15 +12,11 @@
     },
     "Microsoft.Extensions.CodeGeneration.Core": "1.0.0-*",
     "Microsoft.Extensions.CodeGeneration.Templating": "1.0.0-*",
-    "Microsoft.AspNet.Hosting": "1.0.0-*"
+    "Microsoft.AspNet.Hosting": "1.0.0-*",
+    "Microsoft.CodeAnalysis.CSharp": "1.2.0-beta1-20160105-02"
   },
 
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Text.Encoding": "4.0.0.0"
-      }
-    },
     "dnxcore50": {
       "dependencies": {
         "System.Runtime": "4.0.21-*",

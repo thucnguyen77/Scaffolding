@@ -107,7 +107,7 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             }
 
             return typeInfo.Name.EndsWith("CodeGenerator", StringComparison.OrdinalIgnoreCase) ||
-                typeof(ICodeGenerator).GetTypeInfo().IsAssignableFrom(typeInfo);
+                typeInfo.GetCodeGeneratorAttribute() != null;
         }
     }
 }

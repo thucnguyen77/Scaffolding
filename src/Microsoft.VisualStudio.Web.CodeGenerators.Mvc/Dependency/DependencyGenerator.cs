@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
 {
@@ -13,6 +14,7 @@ namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Dependency
     /// For testing using this just make this class implement ICodeGenerator interface.
     /// Eventually this class should just be removed.
     /// </summary>
+    [CodeGenerator("dependency", "GenerateCode")]
     [Alias("dependency")]
     public class DependencyGenerator
     {

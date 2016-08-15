@@ -10,7 +10,7 @@ namespace E2E_Test
 {
     public class E2ETestBase
     {
-        protected static string testProjectPath = Path.GetFullPath(@"../TestApps/WebApplication1");
+        protected static string testProjectPath = Path.GetFullPath(@"../../TestApps/WebApplication1");
 
         protected ScaffoldingE2ETestFixture _fixture;
         protected string _testProjectPath;

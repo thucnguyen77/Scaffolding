@@ -89,7 +89,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
     }
 
     //This should be returned.
-    public class GeneratorDerivingFromInterface : ICodeGenerator
+    [CodeGenerator("test", "NewMethod")]
+    public class GeneratorDerivingFromInterface
     {
     }
 
@@ -99,7 +100,8 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration.Core.Test
     }
 
     //This should not be returned.
-    public abstract class AbstractClassDerivingFromInterface : ICodeGenerator
+    [CodeGenerator("test2", "NewMethod")]
+    public abstract class AbstractClassDerivingFromInterface
     {
     }
 

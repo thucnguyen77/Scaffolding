@@ -3,14 +3,15 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Web.CodeGeneration;
-using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller
 {
+    [CodeGenerator("controller", "GenerateCode")]
     [Alias("controller")]
-    public class CommandLineGenerator : ICodeGenerator
+    public class CommandLineGenerator
     {
         private readonly IServiceProvider _serviceProvider;
 

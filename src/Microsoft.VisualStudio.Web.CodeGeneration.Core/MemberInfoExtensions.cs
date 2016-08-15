@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGeneration
 {
@@ -66,6 +67,24 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
                 {
                     Description = (string)argumentAttributeData.GetNamedArgumentValue("Description"),
                 };
+            }
+            return null;
+        }
+
+        public static CodeGeneratorAttribute GetCodeGeneratorAttribute(this MemberInfo member)
+        {
+            if (member == null)
+            {
+                throw new ArgumentNullException(nameof(member));
+            }
+
+            var codegeneratorAttribute = member.GetAttributeData<CodeGeneratorAttribute>();
+
+            if(codegeneratorAttribute != null)
+            {
+                return new CodeGeneratorAttribute(
+                    (string)codegeneratorAttribute.ConstructorArguments[0].Value,
+                    (string)codegeneratorAttribute.ConstructorArguments[1].Value);
             }
             return null;
         }

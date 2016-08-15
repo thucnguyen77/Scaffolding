@@ -21,7 +21,8 @@
       "type": "build",
       "target": "package"
     },
-    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*"
+    "Microsoft.VisualStudio.Web.CodeGenerators.Mvc": "1.0.0-*",
+    "SampleCustomScaffolder": "1.0.0-*"
   },
 
   "tools": {

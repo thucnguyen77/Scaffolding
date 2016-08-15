@@ -7,11 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using Microsoft.VisualStudio.Web.CodeGeneration.CommandLine;
 using Microsoft.VisualStudio.Web.CodeGeneration.DotNet;
+using Microsoft.VisualStudio.Web.CodeGeneration.Core;
 
 namespace Microsoft.VisualStudio.Web.CodeGenerators.Mvc.View
 {
+    [CodeGenerator("view", "GenerateCode")]
     [Alias("view")]
-    public class ViewGenerator : CommonGeneratorBase, ICodeGenerator
+    public class ViewGenerator : CommonGeneratorBase
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger _logger;

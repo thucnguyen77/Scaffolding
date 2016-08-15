@@ -47,18 +47,21 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
             {
                 if (_codeGeneratorAction == null)
                 {
+                    var codeGenAttr = _codeGeneratorType.GetCodeGeneratorAttribute();
+                    var actionMethod = codeGenAttr == null ? "GenerateCode" : codeGenAttr.ActionMethod;
+                    
                     var candidates = _codeGeneratorType
-                        .GetDeclaredMethods("GenerateCode")
+                        .GetDeclaredMethods(actionMethod)
                         .Where(mi => IsValidAction(mi));
 
                     var count = candidates.Count();
                     if (count == 0)
                     {
-                        throw new InvalidOperationException(string.Format(MessageStrings.MethodNotFound ,"GenerateCode", _codeGeneratorType.FullName));
+                        throw new InvalidOperationException(string.Format(MessageStrings.MethodNotFound , actionMethod, _codeGeneratorType.FullName));
                     }
                     if (count > 1)
                     {
-                        throw new InvalidOperationException(string.Format(MessageStrings.MultipleMethodsFound, "GenerateCode", _codeGeneratorType.FullName));
+                        throw new InvalidOperationException(string.Format(MessageStrings.MultipleMethodsFound, actionMethod, _codeGeneratorType.FullName));
                     }
 
                     _codeGeneratorAction = new ActionDescriptor(this, candidates.First());

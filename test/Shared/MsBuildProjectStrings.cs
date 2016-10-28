@@ -38,56 +38,56 @@ namespace Microsoft.VisualStudio.Web.CodeGeneration
 
   <ItemGroup>
      <PackageReference Include=""Microsoft.AspNetCore.Diagnostics"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.AspNetCore.Mvc"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.AspNetCore.Server.IISIntegration"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.AspNetCore.Server.Kestrel"">
-        <Version> 1.0.0-*</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.AspNetCore.StaticFiles"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Configuration.EnvironmentVariables"">
-        <Version> 1.0.0-*</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Configuration.Json"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Logging"">
-        <Version> 1.0.0-*</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Logging.Console"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Logging.Debug"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
       <PackageReference Include=""Microsoft.Extensions.Options.ConfigurationExtensions"">
-        <Version> 1.0.0</Version>
+        <Version> 1.1.0-*</Version>
       </PackageReference>
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Design"">
-      <Version>1.0.0-*</Version>
+      <Version> 1.1.0-*</Version>
     </PackageReference>
     <!-- The Tools package is included only to get the target delivered to the project-->
     <PackageReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
-      <Version>1.0.0-*</Version>
+      <Version> 1.1.0-*</Version>
     </PackageReference>
     <PackageReference Include=""Microsoft.NET.Sdk"">
       <Version>1.0.0-*</Version>
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include=""Microsoft.NETCore.App"">
-      <Version>1.0.1</Version>
+      <Version> 1.1.0-*</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include=""Microsoft.VisualStudio.Web.CodeGeneration.Tools"">
-      <Version>1.0.0-*</Version>
+      <Version> 1.1.0-*</Version>
     </DotNetCliToolReference>
   </ItemGroup>
   <ItemGroup>
@@ -183,7 +183,7 @@ namespace Test
       <Version>1.0.0-*</Version>
     </PackageReference>
     <PackageReference Include=""NETStandard.Library"">
-      <Version>1.6.0-*</Version>
+      <Version>1.6.1-*</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project=""$(MSBuildToolsPath)\Microsoft.CSharp.targets"" />

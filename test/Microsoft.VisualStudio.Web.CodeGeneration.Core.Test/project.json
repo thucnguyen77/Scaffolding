@@ -9,7 +9,7 @@
       "version": "1.0.0-*",
       "type": "platform"
     },
-    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.0.0-*",
+    "Microsoft.VisualStudio.Web.CodeGeneration.Core": "1.1.0-*",
     "Microsoft.VisualStudio.Web.CodeGeneration.Test.Sources": {
       "version": "1.0.0-*",
       "type": "build"
@@ -20,7 +20,7 @@
     "xunit": "2.2.0-*"
   },
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": "portable-net451+win8"
     }
   },
